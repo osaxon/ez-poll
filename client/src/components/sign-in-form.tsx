@@ -24,6 +24,26 @@ export default function SignInform() {
         body: JSON.stringify(formData),
         credentials: 'include'
       })
+      if (!response.ok) {
+        throw new Error('Login failed')
+      }
+      return response.json()
+    }
+  })
+
+  const { mutate: logout } = useMutation({
+    mutationFn: async () => {
+      console.log('logging out')
+      const response = await fetch('http://localhost:3000/user/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error('loout failed')
+      }
       return response.json()
     },
     onSettled: (data) => console.log(data)
@@ -32,25 +52,30 @@ export default function SignInform() {
   const onSubmit: SubmitHandler<Inputs> = (data) => login(data)
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      {/* register your input into the hook by invoking the "register" function */}
-      <TextField.Input
-        {...register('email', { required: true })}
-        placeholder="Enter your email"
-      />
-      {errors.email && <span>This field is required</span>}
+    <>
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        {/* register your input into the hook by invoking the "register" function */}
+        <TextField.Input
+          {...register('email', { required: true })}
+          placeholder="Enter your email"
+        />
+        {errors.email && <span>This field is required</span>}
 
-      {/* include validation with required or other standard HTML validation rules */}
-      <TextField.Input
-        {...register('password', { required: true })}
-        placeholder="Enter your password"
-      />
-      {/* errors will return when field validation fails  */}
-      {errors.password && <span>This field is required</span>}
+        {/* include validation with required or other standard HTML validation rules */}
+        <TextField.Input
+          {...register('password', { required: true })}
+          placeholder="Enter your password"
+        />
+        {/* errors will return when field validation fails  */}
+        {errors.password && <span>This field is required</span>}
 
-      <Button className="w-full" size="2">
-        Submit
+        <Button className="w-full" size="2">
+          Submit
+        </Button>
+      </form>
+      <Button onClick={() => logout()} variant="soft">
+        Logout
       </Button>
-    </form>
+    </>
   )
 }

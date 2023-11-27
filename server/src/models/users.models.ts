@@ -12,11 +12,6 @@ const userWithoutPasswordSchema = {
   updatedAt: user.updatedAt,
 };
 
-const userWithPasswordSchema = {
-  ...userWithoutPasswordSchema,
-  password: user.password,
-};
-
 export const selectUsers = async (): Promise<UserResponse | void> => {
   return await db.select(userWithoutPasswordSchema).from(user);
 };
@@ -35,14 +30,3 @@ export const selectUserByEmail = async (
     console.error('Error during getUserByEmail:', error);
   }
 };
-
-export const selectUserByEmailForLoin = async (email: string) => {
-    try {
-        const userRecord = await db
-          .select(userWithPasswordSchema)
-          .from(user)
-          .where(eq(user.email, email));
-    } catch (error) {
-        
-    }
-}

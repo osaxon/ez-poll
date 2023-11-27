@@ -1,7 +1,13 @@
-import { Outlet, Route, rootRouteWithContext } from '@tanstack/react-router'
+import {
+  Outlet,
+  Route,
+  redirect,
+  rootRouteWithContext
+} from '@tanstack/react-router'
 import { queryClient } from 'components/App'
 import VotePage from 'components/VotePage'
 import SignInform from 'components/sign-in-form'
+import { getServerSession } from '../lib/index'
 
 const rootRoute = rootRouteWithContext<{
   queryClient: typeof queryClient
@@ -50,11 +56,33 @@ const authRoute = new Route({
         </div>
       </div>
     )
+  },
+  errorComponent: () => <div>Oops! An error occurred</div>
+})
+
+const protectedRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard',
+  beforeLoad: async () => {
+    const session = await getServerSession()
+    if (!session) {
+      throw redirect({
+        to: '/login'
+      })
+    }
+  },
+  component: () => {
+    return (
+      <pre>
+        <code>Dashboard with protected data</code>
+      </pre>
+    )
   }
 })
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   voteRoute,
-  authRoute
+  authRoute,
+  protectedRoute
 ])

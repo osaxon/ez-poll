@@ -127,3 +127,7 @@ export const createUser = async (req: Request, res: Response) => {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
 };
+
+export const validate = (req: Request, res: Response) => {
+  res.status(200).send({ authenticated: true, user: req.session.user });
+};
