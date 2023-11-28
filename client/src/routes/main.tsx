@@ -1,13 +1,9 @@
-import {
-  Link,
-  Outlet,
-  Route,
-  rootRouteWithContext
-} from '@tanstack/react-router'
+import { useAuth0 } from '@auth0/auth0-react'
+import { Outlet, Route, rootRouteWithContext } from '@tanstack/react-router'
 import { queryClient } from 'components/App'
+import LoginButton from 'components/LoginButton'
 import VotePage from 'components/VotePage'
 import SignInform from 'components/sign-in-form'
-import { useAuth } from '../lib/index'
 
 const rootRoute = rootRouteWithContext<{
   queryClient: typeof queryClient
@@ -36,18 +32,13 @@ const indexRoute = new Route({
   path: '/',
   component: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { authenticated } = useAuth()
 
     return (
       <main className="p-2">
         <h3>Welcome Home!</h3>
-        {!authenticated ? (
-          <Link from="/" to="/login">
-            Login
-          </Link>
-        ) : (
-          'log out'
-        )}
+        <pre>{JSON.stringify(import.meta.env, null, 2)}</pre>
+        <pre>{JSON.stringify(window.location.origin, null, 2)}</pre>
+        <LoginButton />
       </main>
     )
   }
@@ -74,14 +65,16 @@ const protectedRoute = new Route({
   path: 'dashboard',
   component: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const auth = useAuth()
+    const { isAuthenticated, isLoading, user } = useAuth0()
 
-    return auth.authenticated ? (
+    return isAuthenticated ? (
       <div>
         <h2>Dashboard</h2>
-        {JSON.stringify(auth.user)}
+        {JSON.stringify(user)}
         <Outlet />
       </div>
+    ) : isLoading ? (
+      <>Loading</>
     ) : (
       <div>You&apos;re not logged in!</div>
     )

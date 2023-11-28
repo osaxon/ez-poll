@@ -1,5 +1,6 @@
 import { HttpStatus } from '@/types/httpStatus.enum';
 import { Request, Response, Router } from 'express';
+import { checkJwt } from '@/middleware/authz.middleware';
 
 const rootRouter = Router();
 
@@ -13,6 +14,7 @@ const handleRoot = async (_req: Request, res: Response) => {
   res.status(HttpStatus.OK).send(html);
 };
 
+rootRouter.use(checkJwt);
 rootRouter.get(RootRoutes.ROOT, handleRoot);
 rootRouter.get(RootRoutes.PULSE, (_req: Request, res: Response) =>
   res.status(200).send({ pulse: 'ok' }),
