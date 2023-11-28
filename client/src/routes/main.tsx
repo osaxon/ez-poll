@@ -1,50 +1,59 @@
 import {
+  Link,
   Outlet,
   Route,
-  redirect,
   rootRouteWithContext
 } from '@tanstack/react-router'
 import { queryClient } from 'components/App'
 import VotePage from 'components/VotePage'
 import SignInform from 'components/sign-in-form'
-import { getServerSession } from '../lib/index'
+import { useAuth } from '../lib/index'
 
 const rootRoute = rootRouteWithContext<{
   queryClient: typeof queryClient
 }>()({
   component: () => {
     return (
-      <>
-        <div className="flex gap-2 p-2 text-lg">
-          <Outlet />
-        </div>
-      </>
+      <div>
+        <Outlet />
+      </div>
     )
   }
 })
 
 const voteRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: '/vote/$name',
+  path: '/vote',
   // load: async ({ params: { name } }) => name,
-  component: ({ useParams }) => {
+  component: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const params = useParams()
-    return <VotePage name={params.name || 'not working'} />
+    return <VotePage name={'not working'} />
   }
 })
 
 const indexRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: () => (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
-    </div>
-  )
+  component: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { authenticated } = useAuth()
+
+    return (
+      <main className="p-2">
+        <h3>Welcome Home!</h3>
+        {!authenticated ? (
+          <Link from="/" to="/login">
+            Login
+          </Link>
+        ) : (
+          'log out'
+        )}
+      </main>
+    )
+  }
 })
 
-const authRoute = new Route({
+const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/login',
   component: () => {
@@ -63,26 +72,31 @@ const authRoute = new Route({
 const protectedRoute = new Route({
   getParentRoute: () => rootRoute,
   path: 'dashboard',
-  beforeLoad: async () => {
-    const session = await getServerSession()
-    if (!session) {
-      throw redirect({
-        to: '/login'
-      })
-    }
-  },
   component: () => {
-    return (
-      <pre>
-        <code>Dashboard with protected data</code>
-      </pre>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const auth = useAuth()
+
+    return auth.authenticated ? (
+      <div>
+        <h2>Dashboard</h2>
+        {JSON.stringify(auth.user)}
+        <Outlet />
+      </div>
+    ) : (
+      <div>You&apos;re not logged in!</div>
     )
   }
 })
 
+const dashboardPanel = new Route({
+  getParentRoute: () => protectedRoute,
+  path: 'panel',
+  id: 'dashboard-panel',
+  component: () => <div>Dashboard panel</div>
+})
+
 export const routeTree = rootRoute.addChildren([
   indexRoute,
-  voteRoute,
-  authRoute,
-  protectedRoute
+  loginRoute,
+  protectedRoute.addChildren([dashboardPanel, voteRoute])
 ])
