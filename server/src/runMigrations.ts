@@ -1,4 +1,4 @@
 import 'dotenv/config';
-import { initMigrations } from './db';
+import { closeDatabaseConnection, initMigrations } from './db';
 
-initMigrations();
+initMigrations().then(() => closeDatabaseConnection());
