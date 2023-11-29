@@ -1,9 +1,22 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useAuth0 } from '@auth0/auth0-react'
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { Outlet, Route, rootRouteWithContext } from '@tanstack/react-router'
 import { queryClient } from 'components/App'
 import LoginButton from 'components/LoginButton'
 import VotePage from 'components/VotePage'
 import SignInform from 'components/sign-in-form'
+import { fetchPulse, getToken } from 'lib/fetchPulse'
+
+const pulseQueryOptions = (getAccessTokenFn) =>
+  queryOptions({
+    queryKey: ['pulse'],
+    queryFn: () => fetchPulse(getAccessTokenFn)
+  })
+
+const tokenQueryOptions = () =>
+  queryOptions({ queryKey: ['token'], queryFn: getToken })
 
 const rootRoute = rootRouteWithContext<{
   queryClient: typeof queryClient
@@ -31,14 +44,18 @@ const indexRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/',
   component: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { getAccessTokenSilently, isLoading, ...rest } = useAuth0()
 
-    return (
+    const { data } = useSuspenseQuery(pulseQueryOptions(getAccessTokenSilently))
+
+    return isLoading ? (
+      'Loading...'
+    ) : (
       <main className="p-2">
         <h3>Welcome Home!</h3>
-        <pre>{JSON.stringify(import.meta.env, null, 2)}</pre>
-        <pre>{JSON.stringify(window.location.origin, null, 2)}</pre>
-        <LoginButton />
+        <pre>{JSON.stringify(rest, null, 2)}</pre>
+        {!rest.isAuthenticated && <LoginButton />}
+        <pre>{JSON.stringify(data, null, 2)}</pre>
       </main>
     )
   }
@@ -70,7 +87,6 @@ const protectedRoute = new Route({
     return isAuthenticated ? (
       <div>
         <h2>Dashboard</h2>
-        {JSON.stringify(user)}
         <Outlet />
       </div>
     ) : isLoading ? (
@@ -81,15 +97,27 @@ const protectedRoute = new Route({
   }
 })
 
-const dashboardPanel = new Route({
+const pulseRoute = new Route({
   getParentRoute: () => protectedRoute,
-  path: 'panel',
-  id: 'dashboard-panel',
-  component: () => <div>Dashboard panel</div>
+  path: '/',
+  component: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { getAccessTokenSilently } = useAuth0()
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    async function callProtectedRoute() {
+      try {
+        const token = await getAccessTokenSilently()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    return <button onClick={callProtectedRoute}>Call route</button>
+  }
 })
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
-  protectedRoute.addChildren([dashboardPanel, voteRoute])
+  protectedRoute.addChildren([voteRoute, pulseRoute])
 ])
