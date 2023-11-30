@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const request = require('supertest');
 const { app } = require('../app');
 const { closeDatabaseConnection } = require('../db/index');

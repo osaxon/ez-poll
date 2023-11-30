@@ -7,7 +7,13 @@ import { initRoutes } from '@/router';
 import { createServer } from 'http';
 
 import { Server, Socket } from 'socket.io';
-import { SessionSocket } from './types';
+import {
+  ClientToServerEvents,
+  InterServerEvents,
+  ServerToClientEvents,
+  SessionSocket,
+  SocketData,
+} from './types';
 
 const app = express();
 const server = createServer(app);
@@ -24,7 +30,12 @@ app.use(expressSession);
 
 initRoutes(app);
 
-const io = new Server(server, {
+const io = new Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>(server, {
   cors: {
     origin: process.env.CLIENT_URL ?? 'http://localhost:5173', // http://localhost:5173 is default local Vite server
     methods: ['GET', 'POST'],
