@@ -15,6 +15,7 @@ io.on('connection', (defaultSocket: Socket) => {
   console.log('connected');
   const socket = <SessionSocket>defaultSocket;
   doSomethingWithSocket(socket);
+  console.log(socket.handshake.query, '<---- query');
 });
 
 console.log(io);
