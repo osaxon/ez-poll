@@ -9,16 +9,13 @@ import {
     rootRouteWithContext,
 } from "@tanstack/react-router";
 import HomePage from "./components/HomePage";
+import Poll from "./components/Poll";
 
 const rootRoute = rootRouteWithContext<{
     queryClient: typeof queryClient;
 }>()({
     component: () => {
-        return (
-            <div>
-                <Outlet />
-            </div>
-        );
+        return <Outlet />;
     },
 });
 
@@ -28,7 +25,13 @@ const indexRoute = new Route({
     component: HomePage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const voteRoute = new Route({
+    getParentRoute: () => rootRoute,
+    path: "poll",
+    component: Poll,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, voteRoute]);
 
 const queryClient = new QueryClient();
 

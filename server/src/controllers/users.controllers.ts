@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
