@@ -1,4 +1,8 @@
-import { selectPolls, selectUsersPolls } from '@/models/polls.models';
+import {
+  selectPolls,
+  selectSinglePoll,
+  selectUsersPolls,
+} from '@/models/polls.models';
 import { Request, Response, NextFunction } from 'express';
 
 export const getPolls = async (
@@ -30,6 +34,23 @@ export const getUsersPolls = async (
       res.status(404).send('not found');
     }
     res.status(200).send({ polls });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPollById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { poll_id } = req.params;
+    const poll = await selectSinglePoll(poll_id);
+    if (!poll) {
+      res.status(404).send('not found');
+    }
+    res.status(200).send(poll);
   } catch (error) {
     next(error);
   }

@@ -4,12 +4,10 @@ export interface SessionSocket extends Socket {
   request: SessionIncomingMessage;
 }
 
-type PollState = {
+export type PollState = {
   question: string;
   options: {
-    id: number;
     text: string;
-    description: string;
     votes: string[];
   }[];
 };

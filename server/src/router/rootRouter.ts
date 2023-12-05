@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpStatus } from '@/types/httpStatus.enum';
 import { Request, Response, Router } from 'express';
 import { checkJwt } from '@/middleware/authz.middleware';
-import { getPolls, getUsersPolls } from '@/controllers/poll.controllers';
+import {
+  getPollById,
+  getPolls,
+  getUsersPolls,
+} from '@/controllers/poll.controllers';
 
 const rootRouter = Router();
 
@@ -21,6 +26,7 @@ rootRouter.get(RootRoutes.PULSE, checkJwt, (_req: Request, res: Response) =>
   res.status(200).send({ pulse: 'ok' }),
 );
 rootRouter.get('/poll', checkJwt, getPolls);
-rootRouter.get('/poll/:user_id', checkJwt, getUsersPolls);
+rootRouter.get('/user/:user_id/polls', checkJwt, getUsersPolls);
+rootRouter.get('/poll/:poll_id', checkJwt, getPollById);
 
 export default rootRouter;

@@ -60,4 +60,6 @@ export type Vote = typeof vote.$inferSelect;
 export type NewVote = typeof vote.$inferInsert;
 
 export type UserResponse = Partial<Omit<User, 'password'>>[];
-export type PollWithOptions = Poll & { options: string[] };
+export type PollWithOptions = Poll & {
+  options: Array<{ text: string; votes: string[] }>;
+};
