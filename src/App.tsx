@@ -13,9 +13,20 @@ import Poll from "./components/Poll";
 
 const rootRoute = rootRouteWithContext<{
     queryClient: typeof queryClient;
+    pollId: string;
 }>()({
     component: () => {
-        return <Outlet />;
+        return (
+            <div
+                style={{
+                    maxWidth: "600px",
+                    marginRight: "auto",
+                    marginLeft: "auto",
+                }}
+            >
+                <Outlet />
+            </div>
+        );
     },
 });
 
@@ -25,19 +36,23 @@ const indexRoute = new Route({
     component: HomePage,
 });
 
-const voteRoute = new Route({
+const pollIdRoute = new Route({
     getParentRoute: () => rootRoute,
-    path: "poll",
-    component: Poll,
+    path: "poll/$poll_id",
+    component: (ctx) => {
+        const c = ctx.useParams();
+
+        return <Poll pollId={c.poll_id} />;
+    },
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, voteRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, pollIdRoute]);
 
 const queryClient = new QueryClient();
 
 const router = new Router({
     routeTree,
-    context: { queryClient },
+    context: { queryClient, pollId: "" },
 });
 
 function App() {
