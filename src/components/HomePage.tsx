@@ -12,7 +12,7 @@ export default function HomePage() {
         queryFn: async () => {
             const token = await getAccessTokenSilently();
             const { data } = await axios.get(
-                `http://localhost:3000/poll/${rest.user?.sub}`,
+                `${import.meta.env.VITE_SERVER_URL}/poll/${rest.user?.sub}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
